@@ -1,10 +1,8 @@
 package com.project.fkmichiura.painterapp
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
+import android.graphics.Paint.DITHER_FLAG
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -13,15 +11,19 @@ import android.view.View
  * Created by Fabio on 26/01/2018.
  */
 
-class DrawingView(context: Context?, attrs: AttributeSet?) : View(context, attrs){
+class DrawingView : View{
 
-    val drawPath : Path? = null
-    val drawPaint : Paint? = null
-    val canvasPaint : Paint? = null
-    val canvas : Canvas? = null
-    val bitmap : Bitmap? = null
+    var drawPath : Path? = null
+    var drawPaint : Paint? = null
+    var canvasPaint : Paint? = null
+    var canvas : Canvas? = null
+    var bitmap : Bitmap? = null
 
-    val color = 0xFF660000
+    var color : Int? = 0xFF660000.toInt()
+
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+        setupDrawing()
+    }
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.drawBitmap(bitmap, 0f, 0f, canvasPaint)
@@ -47,6 +49,39 @@ class DrawingView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         }
         invalidate()
         return true
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        canvas = Canvas(bitmap)
+    }
+
+    fun setColor(newColor : String){
+        invalidate()
+
+        color = Color.parseColor(newColor)
+        drawPaint?.color = color!!
+    }
+
+    fun setupDrawing(){
+        drawPath = Path()
+        drawPaint = Paint()
+
+        drawPaint?.color = color!!
+        drawPaint?.isAntiAlias = true
+        drawPaint?.strokeWidth = 20F
+        drawPaint?.style = Paint.Style.STROKE
+        drawPaint?.strokeJoin = Paint.Join.ROUND
+        drawPaint?.strokeCap = Paint.Cap.ROUND
+
+        canvasPaint = Paint(DITHER_FLAG)
+    }
+
+    fun startNewDraw(){
+        canvas?.drawColor(0, PorterDuff.Mode.CLEAR)
+        invalidate()
     }
 }
 
